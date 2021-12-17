@@ -22,6 +22,11 @@ yarn
  
  * You will find your cluster in the MongoDB Page.
 
+ ## Create Collections
+  * You have to 3 collections: R_Users to store the users, Ingredientes to store the ingredients and Recetas to store the recipes
+
+ 
+ 
 ## Running
 
  * You can run it in developer mode, with hot reload on code change
