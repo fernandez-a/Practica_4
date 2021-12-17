@@ -18,8 +18,10 @@ yarn
  
  * You have to create a file to store the enviroment variables, follow the example of what it has to contain that its uploaded to the github.
 
- * The example has the components to conect to the MongoDB and makes a uri to send to mongo that is like this: mongodb+srv://<User>:<Password>@<Cluster>/myFirstDatabase?retryWrites=true&w=majority
- 
+ * The example has the components to conect to the MongoDB and makes a uri to send to mongo that is like this: 
+ ```
+ mongodb+srv://<User>:<Password>@<Cluster>/myFirstDatabase?retryWrites=true&w=majority
+ ```
  * You will find your cluster in the MongoDB Page.
 
  ## Create Collections
