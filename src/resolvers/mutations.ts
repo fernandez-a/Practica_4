@@ -68,7 +68,7 @@ export const Mutation = {
         else {
             const receta = {
                 ...args,
-                author: context.user.email
+                author: context.user._id.toString()
             };
             context.client.collection("Recetas").insertOne(receta);
             return receta;
