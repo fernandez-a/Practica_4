@@ -52,16 +52,16 @@ export const Query = {
   getRecipe: async (_: any, args: { id: string }, context: { client: Db }) => {
     const valid_id = new ObjectId(args.id);
     const recipe = await context.client.collection("Recetas").findOne({ _id: valid_id }) as Receta;
-    if(recipe) {
+    if (recipe) {
       return {
         ...recipe,
         id: args.id
       }
     }
-    else{
+    else {
       throw new ApolloError("Something went wrong", "Bad Input", { status: 403 });
     }
-    
+
   },
   getIngredient: async (_: any, args: { id: string }, context: { client: Db }) => {
     const valid_id = new ObjectId(args.id);
@@ -74,7 +74,6 @@ export const Query = {
   getUser: async (parent: any, args: { id: string }, context: { client: Db }) => {
     const valid_id = new ObjectId(args.id);
     const user = await context.client.collection("R_Users").findOne({ _id: valid_id });
-    console.log(user)
     if (user) {
       return {
         ...user,
@@ -94,20 +93,26 @@ export const Query = {
     }));
   }
 }
+
+
 export const User = {
   recipes: async (parent: { id: string }, args: any, context: { client: Db }) => {
-    const recetas = await context.client.collection("Recetas").find({ author: parent.id }).toArray();
-    return recetas;
+    console.log(parent.id)
+    const recetas = await context.client.collection("Recetas").find({ author: parent.id.toString() }).toArray();
+    console.log(recetas)
+    return recetas.map(r => ({
+      ...r,
+    }));
   }
 }
 
 export const Recipe = {
   ingredients: async (parent: { id: string, ingredients: string[] }, args: any, context: { client: Db }) => {
     const ingredientes = await context.client.collection("Ingredientes").find({ _id: { $in: parent.ingredients.map(i => new ObjectId(i)) } }).toArray();
-    return ingredientes.map(r => ({
-      ...r,
-      id: r._id.toString()
-    }))
+    return ingredientes.map(i => ({
+      ...i,
+      id: i._id.toString()
+    }));
   },
   author: async (parent: { author: string }, args: any, context: { client: Db }) => {
     const user = await context.client.collection("R_Users").findOne({ _id: new ObjectId(parent.author) }) as Usuario
@@ -115,7 +120,8 @@ export const Recipe = {
       ...user,
       id: user._id
     };
-  }
+  },
+
 }
 
 export const Ingredient = {

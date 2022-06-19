@@ -1,4 +1,4 @@
-import {Db, ObjectId } from "mongodb";
+import { Db, ObjectId } from "mongodb";
 import { ApolloError } from 'apollo-server'
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from "bcrypt"
@@ -42,37 +42,46 @@ export const Mutation = {
         }
 
     },
-    signOut: async (parent: any, args: any, context: { client: Db,user:Usuario }) => {
-        await context.client.collection("R_Users").deleteOne({ _id: context.user._id});
-        await context.client.collection("Recetas").deleteMany({author: context.user._id.toString()});
+    signOut: async (parent: any, args: any, context: { client: Db, user: Usuario }) => {
+        await context.client.collection("R_Users").deleteOne({ _id: context.user._id });
+        await context.client.collection("Recetas").deleteMany({ author: context.user._id.toString() });
         return "Usuario Borrado"
 
     },
     addIngredient: async (parent: any, args: { name: string }, context: { client: Db }) => {
-        const ingredient_db = await context.client.collection("Ingredientes").findOne({ name: args.name })
-        if (ingredient_db) {
-            throw new ApolloError("Already Created", "403");
-        }
-        else {
-            const ingrediente = { ...args };
-            context.client.collection("Ingredientes").insertOne(ingrediente);
-            return ingrediente;
+        try {
+            const ingredient_db = await context.client.collection("Ingredientes").findOne({ name: args.name })
+            if (ingredient_db) {
+                throw new ApolloError("Already Created", "403");
+            }
+            else {
+                const ingrediente = { ...args };
+                context.client.collection("Ingredientes").insertOne(ingrediente);
+                return ingrediente;
+            }
+        } catch (error) {
+            console.log(error)
         }
 
     },
     addRecipe: async (parent: any, args: { name: string, description: string, ingredients: string[] }, context: { client: Db, user: Usuario }) => {
-        const receta_db = await context.client.collection("Recetas").findOne({ name: args.name });
-        if (receta_db) {
-            throw new ApolloError("Already Created", "403");
+        try {
+            const receta_db = await context.client.collection("Recetas").findOne({ name: args.name });
+            if (receta_db) {
+                throw new ApolloError("Already Created", "403");
+            }
+            else {
+                const receta = {
+                    ...args,
+                    author: context.user._id.toString()
+                };
+                context.client.collection("Recetas").insertOne(receta);
+                return receta;
+            }
+        } catch (error) {
+            console.log(error)
         }
-        else {
-            const receta = {
-                ...args,
-                author: context.user._id.toString()
-            };
-            context.client.collection("Recetas").insertOne(receta);
-            return receta;
-        }
+
     },
     updateRecipe: async (parent: any, args: { id: string, ingredients: string[] }, context: { client: Db, user: Usuario }) => {
         const receta_db = await context.client.collection("Recetas").findOne({ author: context.user._id.toString(), _id: new ObjectId(args.id) }) as Receta;
@@ -96,9 +105,9 @@ export const Mutation = {
         await context.client.collection("Recetas").deleteOne({ author: context.user['_id'].toString(), _id: new ObjectId(args.id) })
         return "Receta Borrada";
     },
-    deleteIngredient: async (parent: any, args: {id: string}, context: { client: Db}) => {
-        await context.client.collection("Ingredientes").deleteOne({_id:new ObjectId(args.id)});
-        await context.client.collection("Recetas").deleteMany({ingredients: args.id});
+    deleteIngredient: async (parent: any, args: { id: string }, context: { client: Db }) => {
+        await context.client.collection("Ingredientes").deleteOne({ _id: new ObjectId(args.id) });
+        await context.client.collection("Recetas").deleteMany({ ingredients: args.id });
         return "Ingrediente Borrado";
 
     },

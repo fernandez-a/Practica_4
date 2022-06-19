@@ -1,5 +1,5 @@
 import { connectDB } from "./DBConnection"
-import {ApolloServer } from 'apollo-server'
+import { ApolloServer } from 'apollo-server'
 import { typeDefs } from "./schema"
 import { Query, Recipe, User, Ingredient } from "./resolvers/queries"
 import { Mutation } from "./resolvers/mutations"
@@ -21,24 +21,34 @@ const run = async () => {
     typeDefs,
     resolvers,
     context: async ({ req, res }) => {
-      if (validQuery.some((q) => req.body.query.includes(q))) {
-        if (req.headers.token != null) {
-          const user = await client.collection("R_Users").findOne({ token: req.headers['token'] }) as Usuario;
-          if (user) {
-            return {
-              client,
-              user,
+      try {
+        if (validQuery.some((q) => req.body.query.includes(q))) {
+          if (req.headers.token != null) {
+            try {
+              const user = await client.collection("R_Users").findOne({ token: req.headers['token'] }) as Usuario;
+              if (user) {
+                return {
+                  client,
+                  user,
+                }
+              }
+              else res.sendStatus(403);
+            } catch (error) {
+
             }
+
           }
           else res.sendStatus(403);
         }
-        else res.sendStatus(403);
-      }
-      else {
-        return {
-          client,
+        else {
+          return {
+            client,
+          }
         }
+      } catch (error) {
+        console.log(error)
       }
+
     },
   });
   server.listen(4000).then(() => {
